@@ -1148,6 +1148,25 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     basepoints[0] = damage * 15 / 100;
                     break;
                 }
+
+    			// Fingers of Frost
+                case 74396:
+                {
+                    // Remove only single aura from stack
+                    SpellAuraHolder* holder = triggeredByAura->GetHolder();
+                    if (holder && !holder->IsDeleted())
+                    {
+                        if (holder->ModStackAmount(-1))
+                        {
+                            RemoveSpellAuraHolder(holder);
+                            RemoveAurasDueToSpell(44544);
+                        }
+                        return SPELL_AURA_PROC_OK;
+                    }
+                    else
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
             }
             break;
         }
@@ -3024,6 +3043,15 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                         (((Creature*)pVictim)->GetCreatureInfo()->MechanicImmuneMask & (1 << (MECHANIC_STUN - 1))) == 0)
                     return SPELL_AURA_PROC_FAILED;
             }
+
+			// Fingers of Frost 
+            else if (auraSpellInfo->SpellIconID == 2947)
+            {
+                // proc chance for spells in basepoints
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+            }
+
             break;
         case SPELLFAMILY_WARRIOR:
             // Deep Wounds (replace triggered spells to directly apply DoT), dot spell have familyflags
